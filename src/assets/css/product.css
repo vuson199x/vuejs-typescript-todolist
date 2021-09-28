@@ -1,0 +1,27 @@
+.add-edit .multiselect__placeholder {
+  color: #898181;
+  display: inline-block;
+  margin-bottom: 10px;
+  padding-top: 0px;
+  padding: 12px 19px 2px;
+}
+
+.add-edit .multiselect__tags {
+  min-height: 40px;
+  display: block;
+  padding: 0px;
+  border-radius: 0px;
+  background: #fff;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  margin-bottom: 10px;
+}
+
+.add-edit .multiselect__single {
+  margin-bottom: 8px;
+  padding: 12px 0px 0px 17px;
+}
+
+.add-edit .multiselect__tags-wrap .multiselect__tags {
+  margin-top: 6px;
+}
