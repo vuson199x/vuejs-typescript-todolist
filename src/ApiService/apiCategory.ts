@@ -14,10 +14,10 @@ export default {
   putCategory(payload: { id: string; data: string }): Promise<void> {
     return Api().put(`/api/category/update/${payload.id}`, payload.data);
   },
-  deleteCategory(id: number): Promise<void> {
+  deleteCategory(id: string): Promise<void> {
     return Api().delete(`/api/category/delete/${id}`);
   },
-  getListDetail(id: number): Promise<void> {
+  getListDetail(id: string): Promise<void> {
     return Api().get(`/api/category/view/${id}`);
   },
 };

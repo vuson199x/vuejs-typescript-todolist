@@ -120,6 +120,7 @@ import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 import { ParamsInterface, TagInterface, User } from "../utils/interface";
 import TagService from "../ApiService/apiTag";
 import AddEditTag from "../components/AddEditTag.vue";
+import { Observable } from "rxjs";
 @Component({
   components: {
     AddEditTag,
@@ -167,51 +168,89 @@ export default class Tags extends Vue {
     this.getData();
   }
 
-  async onDelete(tag: TagInterface): Promise<void> {
-    console.log("tag", tag);
-    try {
-      if (window.confirm(`Are you want to delete this tag?`)) {
-        await TagService.deleteTag(tag.id);
-        this.getData();
-        swal({
-          title: "Success",
-          text: `Delete tag successfully!`,
-          icon: "success",
+  onDelete(tag: TagInterface): void {
+    if (window.confirm(`Are you want to delete this tag?`)) {
+      let observable = Observable.create((observer: any) => {
+        TagService.deleteTag(tag.id)
+          .then((response: any) => {
+            observer.next(response);
+          })
+          .catch((error: any) => {
+            swal({
+              title: "Error",
+              text: error.response.data.message,
+              icon: "error",
+            });
+            observer.error(error);
+          });
+      });
+      observable.subscribe({
+        next: (data: any) => {
+          this.getData();
+          swal({
+            title: "Success",
+            text: `Delete tag successfully!`,
+            icon: "success",
+          });
+        },
+      });
+    }
+  }
+  getData(): void {
+    const payload = {
+      userId: this.id,
+      ...this.params,
+    };
+    let observable = Observable.create((observer: any) => {
+      TagService.getList(payload)
+        .then((response: any) => {
+          observer.next(response.tags);
+        })
+        .catch((error: any) => {
+          swal({
+            title: "Error",
+            text: error.response.data.message,
+            icon: "error",
+          });
+          observer.error(error);
         });
-      }
-    } catch (error) {
-      console.log(error);
-    }
+    });
+    observable.subscribe({
+      next: (data: any) => (this.tags = data),
+    });
   }
-  async getData(): Promise<void> {
-    try {
-      const payload = {
-        userId: this.id,
-        ...this.params,
-      };
-      const response: any = await TagService.getList(payload);
-      console.log("response 123", response);
-      this.tags = response.tags;
-    } catch (error) {
-      console.log(error);
-    }
-  }
-  async onCreateTag(name: string): Promise<void> {
-    console.log(name);
+  onCreateTag(name: string): void {
     const payload = {
       name: name,
       user_id: this.id,
     };
-    await TagService.postTag(payload);
-    this.getData();
-    this.isVisible = false;
-    swal({
-      title: "Success",
-      text: `Add tag successfully!`,
-      icon: "success",
+    let observable = Observable.create((observer: any) => {
+      TagService.postTag(payload)
+        .then((response: any) => {
+          observer.next(response);
+        })
+        .catch((error: any) => {
+          swal({
+            title: "Error",
+            text: error.response.data.message,
+            icon: "error",
+          });
+          observer.error(error);
+        });
+    });
+    observable.subscribe({
+      next: (data: any) => {
+        this.getData();
+        this.isVisible = false;
+        swal({
+          title: "Success",
+          text: `Add tag successfully!`,
+          icon: "success",
+        });
+      },
     });
   }
-  async onUpdateTag(data: { id: string; name: string }): Promise<void> {
+  onUpdateTag(data: { id: string; name: string }): void {
     const payload = {
       id: data.id,
       data: {
@@ -219,14 +258,31 @@ export default class Tags extends Vue {
         user_id: this.id,
       },
     };
-    await TagService.putTag(payload);
-    this.getData();
-    this.isVisible = false;
-    this.dataUpdate = null;
-    swal({
-      title: "Success",
-      text: `Update tag successfully!`,
-      icon: "success",
+    let observable = Observable.create((observer: any) => {
+      TagService.putTag(payload)
+        .then((response: any) => {
+          observer.next(response);
+        })
+        .catch((error: any) => {
+          swal({
+            title: "Error",
+            text: error.response.data.message,
+            icon: "error",
+          });
+          observer.error(error);
+        });
+    });
+    observable.subscribe({
+      next: (data: any) => {
+        this.getData();
+        this.isVisible = false;
+        this.dataUpdate = null;
+        swal({
+          title: "Success",
+          text: `Update tag successfully!`,
+          icon: "success",
+        });
+      },
     });
   }
   setPages(): void {

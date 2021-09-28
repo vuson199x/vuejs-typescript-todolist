@@ -82,6 +82,8 @@ import Multiselect from "vue-multiselect";
 import { ProductInterface, ProductSubmitInterface } from "@/utils/interface";
 import TagService from "@/ApiService/apiTag";
 import CategoryService from "@/ApiService/apiCategory";
+import { Observable } from "rxjs";
+import swal from "sweetalert";
 
 @Component({
   components: {
@@ -153,38 +155,62 @@ export default class AddEditProduct extends Vue {
       console.log(error);
     }
   }
-  async getDataCatgory(): Promise<void> {
-    try {
-      const payload = {
-        ...this.params,
-      };
-      const response: any = await CategoryService.getList(payload);
-      this.optionCategory = response.categories;
-    } catch (error) {
-      console.log(error);
-    }
+  getDataCatgory(): void {
+    const payload = {
+      ...this.params,
+    };
+    let observable = Observable.create((observer: any) => {
+      CategoryService.getList(payload)
+        .then((response: any) => {
+          observer.next(response.categories);
+        })
+        .catch((error: any) => {
+          swal({
+            title: "Error",
+            text: error.response.data.message,
+            icon: "error",
+          });
+          observer.error(error);
+        });
+    });
+    observable.subscribe({
+      next: (data: any) => (this.optionCategory = data),
+    });
   }
-  async getDataTags(): Promise<void> {
-    try {
-      const payload = {
-        ...this.params,
-      };
-      const response: any = await TagService.getList(payload);
-      this.optionTags = response.tags;
-    } catch (error) {
-      console.log(error);
-    }
+  getDataTags(): void {
+    const payload = {
+      ...this.params,
+    };
+    let observable = Observable.create((observer: any) => {
+      TagService.getList(payload)
+        .then((response: any) => {
+          observer.next(response.tags);
+        })
+        .catch((error: any) => {
+          swal({
+            title: "Error",
+            text: error.response.data.message,
+            icon: "error",
+          });
+          observer.error(error);
+        });
+    });
+    observable.subscribe({
+      next: (data: any) => (this.optionTags = data),
+    });
   }
 
   created(): void {
     this.getDataCatgory();
     this.getDataTags();
-    this.id = this.dataUpdate.id;
-    this.title = this.dataUpdate.title;
-    this.description = this.dataUpdate.description;
-    this.tags = this.dataUpdate.tags;
-    this.url = this.dataUpdate.url;
-    this.category = this.dataUpdate.category;
+    this.id = this.dataUpdate.id ? this.dataUpdate.id : "";
+    this.title = this.dataUpdate.title ? this.dataUpdate.title : "";
+    this.description = this.dataUpdate.description
+      ? this.dataUpdate.description
+      : "";
+    this.tags = this.dataUpdate.tags ? this.dataUpdate.tags : "";
+    this.url = this.dataUpdate.url ? this.dataUpdate.url : "";
+    this.category = this.dataUpdate.category ? this.dataUpdate.category : "";
   }
 }
 </script>

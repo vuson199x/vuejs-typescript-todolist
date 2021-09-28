@@ -116,7 +116,7 @@ import swal from "sweetalert";
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 import CategoryService from "../ApiService/apiCategory";
 import AddEditCategory from "@/components/AddEditCategory.vue";
-
+import { Observable } from "rxjs";
 @Component({
   components: {
     AddEditCategory,
@@ -163,77 +163,122 @@ export default class Category extends Vue {
     this.dataUpdate = null;
     this.isVisible = false;
   }
-  async onUpdateCategory(data: { id: string; name: string }): Promise<void> {
-    console.log("name", name);
-    try {
-      const payload: any = {
-        id: data.id,
-        data: {
-          name: data.name,
-          user_id: this.id,
-        },
-      };
-      await CategoryService.putCategory(payload);
-      this.getData();
-      this.isVisible = false;
-      this.dataUpdate = null;
-      swal({
-        title: "Success",
-        text: `Update category successfully!`,
-        icon: "success",
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  }
-  async onCreateCategory(name: string): Promise<void> {
-    console.log(name);
-    try {
-      const payload: any = {
-        name: name,
+  onUpdateCategory(data: { id: string; name: string }): void {
+    const payload: any = {
+      id: data.id,
+      data: {
+        name: data.name,
         user_id: this.id,
-      };
-      await CategoryService.postCategory(payload);
-      this.getData();
-      this.isVisible = false;
-      swal({
-        title: "Success",
-        text: `Add category successfully!`,
-        icon: "success",
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  }
-  async onDelete(category: any): Promise<void> {
-    console.log("category", category);
-    try {
-      if (window.confirm(`Are you want to delete this category?`)) {
-        await CategoryService.deleteCategory(category.id);
+      },
+    };
+    let observable = Observable.create((observer: any) => {
+      CategoryService.putCategory(payload)
+        .then((response: any) => {
+          observer.next(response);
+        })
+        .catch((error: any) => {
+          swal({
+            title: "Error",
+            text: error.response.data.message,
+            icon: "error",
+          });
+          observer.error(error);
+        });
+    });
+    observable.subscribe({
+      next: (data: any) => {
         this.getData();
+        this.isVisible = false;
+        this.dataUpdate = null;
         swal({
           title: "Success",
-          text: `Delete category successfully!`,
+          text: `Update category successfully!`,
           icon: "success",
         });
-      }
-    } catch (error) {
-      console.log(error);
+      },
+    });
+  }
+  onCreateCategory(name: string): void {
+    const payload: any = {
+      name: name,
+      user_id: this.id,
+    };
+    let observable = Observable.create((observer: any) => {
+      CategoryService.postCategory(payload)
+        .then((response: any) => {
+          observer.next(response);
+        })
+        .catch((error: any) => {
+          swal({
+            title: "Error",
+            text: error.response.data.message,
+            icon: "error",
+          });
+          observer.error(error);
+        });
+    });
+    observable.subscribe({
+      next: (data: any) => {
+        this.getData();
+        this.isVisible = false;
+        swal({
+          title: "Success",
+          text: `Add category successfully!`,
+          icon: "success",
+        });
+      },
+    });
+  }
+  onDelete(category: any): void {
+    if (window.confirm(`Are you want to delete this category?`)) {
+      let observable = Observable.create((observer: any) => {
+        CategoryService.deleteCategory(category.id)
+          .then((response: any) => {
+            observer.next(response);
+          })
+          .catch((error: any) => {
+            swal({
+              title: "Error",
+              text: error.response.data.message,
+              icon: "error",
+            });
+            observer.error(error);
+          });
+      });
+      observable.subscribe({
+        next: (data: any) => {
+          this.getData();
+          swal({
+            title: "Success",
+            text: `Delete category successfully!`,
+            icon: "success",
+          });
+        },
+      });
     }
   }
-  async getData(): Promise<void> {
-    console.log("id", this.id);
-    try {
-      const payload = {
-        userId: this.id,
-        ...this.params,
-      };
-      const response: any = await CategoryService.getList(payload);
-      console.log("response 123", response);
-      this.categories = response.categories;
-    } catch (error) {
-      console.log(error);
-    }
+  getData(): void {
+    const payload = {
+      userId: this.id,
+      ...this.params,
+    };
+    let observable = Observable.create((observer: any) => {
+      CategoryService.getList(payload)
+        .then((response: any) => {
+          observer.next(response.categories);
+        })
+        .catch((error: any) => {
+          swal({
+            title: "Error",
+            text: error.response.data.message,
+            icon: "error",
+          });
+          observer.error(error);
+        });
+    });
+    observable.subscribe({
+      next: (data: any) => (this.categories = data),
+    });
   }
   setPages(): void {
     var numPages = this.categories.length / this.pagination.limit;

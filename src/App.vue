@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <CompHeader />
-    <router-view v-if="isAuth" />
+    <router-view />
   </div>
 </template>
 

@@ -84,11 +84,16 @@ export default class Login extends Vue {
     this.isActive = 0;
     this.username = "";
     this.password = "";
+    this.title = "";
   }
   handleRegister(): void {
     this.isActive = 1;
     this.username = "";
     this.password = "";
+    this.title = "";
+  }
+  get result(): void {
+    return this.$store.state.AUTH.user;
   }
 }
 </script>

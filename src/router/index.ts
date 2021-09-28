@@ -6,10 +6,14 @@ import Error from "../views/404page.vue";
 import Tags from "../views/Tags.vue";
 import Category from "../views/Category.vue";
 import Product from "../views/Product.vue";
+import CategoryDetail from "@/components/CategoryDetail";
+import ProductDetail from "@/components/ProductDetail";
+import TagDetail from "@/components/TagDetail";
+
 import store from "../store";
 Vue.use(VueRouter);
 
-const routes: Array<RouteConfig> = [
+const routes = [
   {
     path: "/",
     name: "Home",
@@ -22,36 +26,36 @@ const routes: Array<RouteConfig> = [
     component: Tags,
     meta: { requiresAuth: true },
   },
-  // {
-  //   path: "/tags/:userId/:tagId",
-  //   name: "TagDetail",
-  //   component: TagDetail,
-  //   meta: { requiresAuth: true }
-  // },
+  {
+    path: "/tags/:userId/:tagId",
+    name: "TagDetail",
+    component: TagDetail,
+    meta: { requiresAuth: true },
+  },
   {
     path: "/category/:id",
     name: "Category",
     component: Category,
     meta: { requiresAuth: true },
   },
-  // {
-  //   path: "/category/:userId/:categoryId",
-  //   name: "CategoryDetail",
-  //   component: CategoryDetail,
-  //   meta: { requiresAuth: true }
-  // },
+  {
+    path: "/category/:userId/:categoryId",
+    name: "CategoryDetail",
+    component: CategoryDetail,
+    meta: { requiresAuth: true },
+  },
   {
     path: "/product/:id",
     name: "Product",
     component: Product,
     meta: { requiresAuth: true },
   },
-  // {
-  //   path: "/product/:userId/:productId",
-  //   name: "ProductDetail",
-  //   component: ProductDetail,
-  //   meta: { requiresAuth: true }
-  // },
+  {
+    path: "/product/:userId/:productId",
+    name: "ProductDetail",
+    component: ProductDetail,
+    meta: { requiresAuth: true },
+  },
   {
     path: "/login",
     name: "Login",
@@ -70,15 +74,12 @@ const routes: Array<RouteConfig> = [
 
 const router = new VueRouter({
   mode: "history",
-  base: process.env.BASE_URL,
+  // base: ,
   routes,
 });
 
 router.beforeEach((to, from, next) => {
-  console.log(
-    "to",
-    to.matched.some((record) => record.meta.requiresAuth)
-  );
+  console.log("to", to);
   if (to.matched.some((record) => record.meta.requiresAuth)) {
     store.dispatch("AUTH/getLocalStorage");
     if (store.state.AUTH.user) {
@@ -91,6 +92,7 @@ router.beforeEach((to, from, next) => {
       });
     }
   } else {
+    console.log("123213123123123");
     next();
   }
 });

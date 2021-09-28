@@ -5,12 +5,9 @@ import { LoginInterface, RegisterInterface, UserState } from "../interface";
 import AuthServices from "../../ApiService/auth";
 import router from "../../router";
 import Cookies from "js-cookie";
-const state: UserState = {
-  user: {
-    id: "",
-    name: "",
-    accessToken: "",
-  },
+import { Observable } from "rxjs";
+const state = {
+  user: null,
   result: 0,
 };
 const getters = {};
@@ -21,52 +18,64 @@ const mutations = {
 };
 const actions = {
   getLocalStorage(): void {
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
-
+    console.log("user123123123");
+    const user = JSON.parse(localStorage.getItem("user") || "null");
     console.log("user", user);
     if (user) {
       state.user = user;
     }
   },
-  async login({ commit }: any, crendentials: LoginInterface): Promise<void> {
-    try {
-      const response = await AuthServices.login({ ...crendentials });
-      state.user = response;
-      router.push("/");
-    } catch (error) {
-      swal({
-        title: "Lỗi",
-        text: error.response.data.message,
-        icon: "error",
-      });
-    }
+  login({ commit }: any, crendentials: LoginInterface): void {
+    const observable = Observable.create((observer: any) => {
+      AuthServices.login({ ...crendentials })
+        .then((response: any) => {
+          observer.next(response);
+        })
+        .catch((error: any) => {
+          swal({
+            title: "Error",
+            text: error.response.data.message,
+            icon: "error",
+          });
+          observer.error(error);
+        });
+    });
+    observable.subscribe({
+      next: (data: any) => {
+        state.user = data;
+        router.push("/");
+      },
+    });
   },
-  async register(
-    { commit }: any,
-    crendentials: RegisterInterface
-  ): Promise<void> {
-    try {
-      const response = await AuthServices.register({ ...crendentials });
-      swal({
-        title: "Thành công",
-        text: response.message,
-        icon: "success",
-      });
-    } catch (error) {
-      swal({
-        title: "Lỗi",
-        text: error.response.data.message,
-        icon: "error",
-      });
-    }
+
+  register({ commit }: any, crendentials: RegisterInterface): void {
+    const observable = Observable.create((observer: any) => {
+      AuthServices.register({ ...crendentials })
+        .then((response: any) => {
+          observer.next(response.message);
+        })
+        .catch((error: any) => {
+          swal({
+            title: "Error",
+            text: error.response.data.message,
+            icon: "error",
+          });
+          observer.error(error);
+        });
+    });
+    observable.subscribe({
+      next: (data: any) => {
+        swal({
+          title: "Success",
+          text: data,
+          icon: "success",
+        });
+      },
+    });
   },
-  async logout({ commit }: any): Promise<void> {
+  logout({ commit }: any): void {
     try {
-      state.user = {
-        id: "",
-        name: "",
-        accessToken: "",
-      };
+      state.user = null;
       localStorage.setItem("user", "");
       Cookies.set(SESSION_ID, "");
     } catch (error) {

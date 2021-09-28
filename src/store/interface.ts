@@ -5,7 +5,7 @@ interface User {
 }
 
 export interface UserState {
-  user: User;
+  user: null;
   result: number;
 }
 

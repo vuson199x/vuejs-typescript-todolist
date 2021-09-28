@@ -128,6 +128,7 @@ import {
   ProductSubmitInterface,
   User,
 } from "@/utils/interface";
+import { Observable } from "rxjs";
 import swal from "sweetalert";
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 import ProductService from "../ApiService/apiProduct";
@@ -179,38 +180,67 @@ export default class Product extends Vue {
     this.params.sortName = value;
     this.getData();
   }
-  async onDelete(product: ProductInterface): Promise<void> {
-    console.log("product", product);
-    try {
-      if (window.confirm(`Are you want to delete this product?`)) {
-        await ProductService.deleteProduct(product.id);
-        this.getData();
-        swal({
-          title: "Success",
-          text: `Delete product successfully!`,
-          icon: "success",
-        });
-      }
-    } catch (error) {
-      console.log(error);
+  onDelete(product: ProductInterface): void {
+    if (window.confirm(`Are you want to delete this product?`)) {
+      let observable = Observable.create((observer: any) => {
+        ProductService.deleteProduct(product.id)
+          .then((response: any) => {
+            observer.next(response);
+          })
+          .catch((error: any) => {
+            swal({
+              title: "Error",
+              text: error.response.data.message,
+              icon: "error",
+            });
+            observer.error(error);
+          });
+      });
+      observable.subscribe({
+        next: (data: any) => {
+          this.getData();
+          swal({
+            title: "Success",
+            text: `Delete product successfully!`,
+            icon: "success",
+          });
+        },
+      });
     }
   }
-  async onCreateProduct(data: ProductSubmitInterface): Promise<void> {
+  onCreateProduct(data: ProductSubmitInterface): void {
     console.log(data);
     const payload = {
       ...data,
       user_id: this.id,
     };
-    await ProductService.postProduct(payload);
-    this.getData();
-    this.isVisible = false;
-    swal({
-      title: "Success",
-      text: `Add product successfully!`,
-      icon: "success",
+    let observable = Observable.create((observer: any) => {
+      ProductService.postProduct(payload)
+        .then((response: any) => {
+          observer.next(response);
+        })
+        .catch((error: any) => {
+          swal({
+            title: "Error",
+            text: error.response.data.message,
+            icon: "error",
+          });
+          observer.error(error);
+        });
+    });
+    observable.subscribe({
+      next: (data: any) => {
+        this.getData();
+        this.isVisible = false;
+        swal({
+          title: "Success",
+          text: `Add product successfully!`,
+          icon: "success",
+        });
+      },
     });
   }
-  async onUpdateProduct(data: ProductSubmitInterface): Promise<void> {
+  onUpdateProduct(data: ProductSubmitInterface): void {
     console.log(data);
     const payload = {
       id: data.id,
@@ -219,27 +249,55 @@ export default class Product extends Vue {
         user_id: this.id,
       },
     };
-    await ProductService.putProduct(payload);
-    this.getData();
-    this.isVisible = false;
-    swal({
-      title: "Success",
-      text: `Update product successfully!`,
-      icon: "success",
+    let observable = Observable.create((observer: any) => {
+      ProductService.putProduct(payload)
+        .then((response: any) => {
+          observer.next(response);
+        })
+        .catch((error: any) => {
+          swal({
+            title: "Error",
+            text: error.response.data.message,
+            icon: "error",
+          });
+          observer.error(error);
+        });
+    });
+    observable.subscribe({
+      next: (data: any) => {
+        this.getData();
+        this.isVisible = false;
+        this.dataUpdate = null;
+        swal({
+          title: "Success",
+          text: `Update product successfully!`,
+          icon: "success",
+        });
+      },
     });
   }
-  async getData(): Promise<void> {
-    console.log("id", this.id);
-    try {
-      const payload = {
-        userId: this.id,
-        ...this.params,
-      };
-      const response: any = await ProductService.getList(payload);
-      this.products = response.qas;
-    } catch (error) {
-      console.log(error);
-    }
+  getData(): void {
+    const payload = {
+      userId: this.id,
+      ...this.params,
+    };
+    let observable = Observable.create((observer: any) => {
+      ProductService.getList(payload)
+        .then((response: any) => {
+          observer.next(response.qas);
+        })
+        .catch((error: any) => {
+          swal({
+            title: "Error",
+            text: error.response.data.message,
+            icon: "error",
+          });
+          observer.error(error);
+        });
+    });
+    observable.subscribe({
+      next: (data: any) => (this.products = data),
+    });
   }
   setPages(): void {
     var numPages = this.products.length / this.pagination.limit;

@@ -44,7 +44,7 @@ export default class CompHeader extends Vue {
     this.$store.dispatch("AUTH/logout");
   }
 
-  get result(): User {
+  get result() {
     return this.$store.state.AUTH.user;
   }
 }
