@@ -8,7 +8,7 @@
           id="myInput"
           placeholder="Search for products..."
           v-on:keyup.enter="onSeach"
-          v-model="params.keyword"
+          v-model="products.params.keyword"
         />
         <button
           class="button success"
@@ -26,14 +26,15 @@
               v-on:click="changeSortType('asc')"
               v-bind:class="{
                 sortSelected:
-                  params.sortType === 'asc' || params.sortType === '',
+                  products.params.sortType === 'asc' ||
+                  products.params.sortType === '',
               }"
               >Asc</span
             >
             <span
               v-on:click="changeSortType('desc')"
               v-bind:class="{
-                sortSelected: params.sortType === 'desc',
+                sortSelected: products.params.sortType === 'desc',
               }"
               >Desc</span
             >
@@ -92,28 +93,31 @@
 
       <div class="pagination">
         <a
-          v-if="pagination.currentPage != 1"
-          v-on:click="pagination.currentPage--"
+          v-if="products.pagination.currentPage != 1"
+          v-on:click="products.pagination.currentPage--"
           >&laquo;</a
         >
         <a
-          v-for="(pag, index) in pagination.totalPage"
+          v-for="(pag, index) in products.pagination.totalPage"
           v-bind:key="index"
-          @click="pagination.currentPage = pag"
+          @click="products.pagination.currentPage = pag"
           >{{ pag }}</a
         >
         <a
-          v-if="pagination.currentPage < pagination.totalPage.length"
-          v-on:click="pagination.currentPage++"
+          v-if="
+            products.pagination.currentPage <
+              products.pagination.totalPage.length
+          "
+          v-on:click="products.pagination.currentPage++"
           >&raquo;</a
         >
       </div>
     </div>
 
     <AddEditProduct
-      v-if="isVisible"
-      v-bind:isVisible="isVisible"
-      v-bind:dataUpdate="dataUpdate"
+      v-if="products.isVisible"
+      v-bind:isVisible="products.isVisible"
+      v-bind:dataUpdate="products.dataUpdate"
       v-on:handleCancelEvent="handleCancelEvent"
       v-on:onCreateProduct="onCreateProduct"
       v-on:onUpdateProduct="onUpdateProduct"

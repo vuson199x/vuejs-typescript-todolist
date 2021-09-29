@@ -10,7 +10,7 @@
           id="myInput"
           placeholder="Search for categories.."
           v-on:keyup.enter="onSeach"
-          v-model="params.keyword"
+          v-model="categories.params.keyword"
         />
         <button
           class="button success"
@@ -28,13 +28,16 @@
               v-on:click="changeSortType('asc')"
               v-bind:class="{
                 sortSelected:
-                  params.sortType === 'asc' || params.sortType === '',
+                  categories.params.sortType === 'asc' ||
+                  categories.params.sortType === '',
               }"
               >Asc</span
             >
             <span
               v-on:click="changeSortType('desc')"
-              v-bind:class="{ sortSelected: params.sortType === 'desc' }"
+              v-bind:class="{
+                sortSelected: categories.params.sortType === 'desc',
+              }"
               >Desc</span
             >
           </div>
@@ -82,28 +85,31 @@
 
       <div class="pagination">
         <a
-          v-if="pagination.currentPage != 1"
-          v-on:click="pagination.currentPage--"
+          v-if="categories.pagination.currentPage != 1"
+          v-on:click="categories.pagination.currentPage--"
           >&laquo;</a
         >
         <a
-          v-for="(pag, index) in pagination.totalPage"
+          v-for="(pag, index) in categories.pagination.totalPage"
           v-bind:key="index"
-          @click="pagination.currentPage = pag"
+          @click="categories.pagination.currentPage = pag"
           >{{ pag }}</a
         >
         <a
-          v-if="pagination.currentPage < pagination.totalPage.length"
-          v-on:click="pagination.currentPage++"
+          v-if="
+            categories.pagination.currentPage <
+              categories.pagination.totalPage.length
+          "
+          v-on:click="categories.pagination.currentPage++"
           >&raquo;</a
         >
       </div>
     </div>
 
     <AddEditCategory
-      v-if="isVisible"
-      v-bind:isVisible="isVisible"
-      v-bind:dataUpdate="dataUpdate"
+      v-if="categories.isVisible"
+      v-bind:isVisible="categories.isVisible"
+      v-bind:dataUpdate="categories.dataUpdate"
       v-on:handleCancelEvent="handleCancelEvent"
       v-on:onCreateCategory="onCreateCategory"
       v-on:onUpdateCategory="onUpdateCategory"

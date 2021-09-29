@@ -19,6 +19,12 @@ export interface ParamsInterface {
   keyword: string;
 }
 
+export interface PaginationInterface {
+  totalPage: number[];
+  currentPage: number;
+  limit: number;
+}
+
 export interface ProductInterface {
   title: string;
   description: string;

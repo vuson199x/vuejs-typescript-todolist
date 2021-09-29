@@ -1,3 +1,4 @@
+import { ProductModel } from "@/model/ProductModel";
 import {
   ParamsInterface,
   ProductInterface,
@@ -16,15 +17,13 @@ import AddEditProduct from "../components/AddEditProduct.vue";
 })
 export default class Product extends Vue {
   id = this.$route.params.id;
-  products = [];
-  isVisible = false;
-  dataUpdate = null;
-  pagination: any = {
+
+  isPagination = {
     totalPage: [],
     currentPage: 1,
     limit: 20,
   };
-  params: ParamsInterface = {
+  isParams = {
     page: 1,
     size: 0,
     sortName: "title",
@@ -32,28 +31,37 @@ export default class Product extends Vue {
     keyword: "",
   };
 
+  products = new ProductModel(
+    this.id,
+    [],
+    false,
+    null,
+    this.isPagination,
+    this.isParams
+  );
+
   isVisibleEditModal(data: any): void {
-    this.dataUpdate = data;
-    this.isVisible = true;
+    this.products.dataUpdate = data;
+    this.products.isVisible = true;
   }
   isVisibleAddModal(): void {
-    this.isVisible = true;
+    this.products.isVisible = true;
   }
   handleCancelEvent() {
-    this.dataUpdate = null;
-    this.isVisible = false;
+    this.products.dataUpdate = null;
+    this.products.isVisible = false;
   }
   onSeach(): void {
     this.getData();
   }
   changeSortType(value: string): void {
     console.log(value, "value");
-    this.params.sortType = value;
+    this.products.params.sortType = value;
     this.getData();
   }
   changeSortName(value: string): void {
     console.log("value");
-    this.params.sortName = value;
+    this.products.params.sortName = value;
     this.getData();
   }
   onDelete(product: ProductInterface): void {
@@ -107,7 +115,7 @@ export default class Product extends Vue {
     observable.subscribe({
       next: (data: any) => {
         this.getData();
-        this.isVisible = false;
+        this.products.isVisible = false;
         swal({
           title: "Success",
           text: `Add product successfully!`,
@@ -142,8 +150,8 @@ export default class Product extends Vue {
     observable.subscribe({
       next: (data: any) => {
         this.getData();
-        this.isVisible = false;
-        this.dataUpdate = null;
+        this.products.isVisible = false;
+        this.products.dataUpdate = null;
         swal({
           title: "Success",
           text: `Update product successfully!`,
@@ -155,7 +163,7 @@ export default class Product extends Vue {
   getData(): void {
     const payload = {
       userId: this.id,
-      ...this.params,
+      ...this.products.params,
     };
     const observable = Observable.create((observer: any) => {
       ProductService.getList(payload)
@@ -173,20 +181,22 @@ export default class Product extends Vue {
     });
     observable.subscribe({
       next: (data: any) => {
-        (this.products = data), (this.pagination.totalPage = []);
+        (this.products.products = data),
+          (this.products.pagination.totalPage = []);
       },
     });
   }
   setPages(): void {
-    const numPages = this.products.length / this.pagination.limit;
+    const numPages =
+      this.products.products.length / this.products.pagination.limit;
     for (let i = 0; i < numPages; i++) {
       const pageNum = i + 1;
-      this.pagination.totalPage.push(pageNum);
+      this.products.pagination.totalPage.push(pageNum);
     }
   }
   paginate(products: any): void {
-    const page = this.pagination.currentPage;
-    const perPage = this.pagination.limit;
+    const page = this.products.pagination.currentPage;
+    const perPage = this.products.pagination.limit;
     const from = page * perPage - perPage;
     const to = page * perPage;
     return products.slice(from, to);
@@ -197,14 +207,14 @@ export default class Product extends Vue {
   }
   //computed
   get displayedProducts(): any {
-    return this.paginate(this.products);
+    return this.paginate(this.products.products);
   }
 
   created(): void {
     this.getData();
   }
 
-  @Watch("products")
+  @Watch("products.products")
   onChangeProduct(): void {
     this.setPages();
   }

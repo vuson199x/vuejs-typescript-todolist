@@ -4,50 +4,58 @@ import { ParamsInterface, TagInterface, User } from "../utils/interface";
 import TagService from "../ApiService/apiTag";
 import AddEditTag from "../components/AddEditTag.vue";
 import { Observable } from "rxjs";
+import { TagModel } from "@/model/TagModel";
 @Component({
   components: {
     AddEditTag,
   },
 })
 export default class Tags extends Vue {
-  id = this.$route.params.id;
-  tags = [];
-  dataUpdate = null;
-  isVisible = false;
-  pagination: any = {
+  isPagination = {
     totalPage: [],
     currentPage: 1,
     limit: 20,
   };
-  params: ParamsInterface = {
+
+  isParams = {
     page: 1,
     size: 0,
     sortName: "name",
     sortType: "",
     keyword: "",
   };
+  id = this.$route.params.id;
+
+  tags = new TagModel(
+    this.id,
+    [],
+    false,
+    null,
+    this.isPagination,
+    this.isParams
+  );
   isVisibleEditModal(data: any): void {
-    this.dataUpdate = data;
-    this.isVisible = true;
+    this.tags.dataUpdate = data;
+    this.tags.isVisible = true;
   }
   isVisibleAddModal(): void {
-    this.isVisible = true;
+    this.tags.isVisible = true;
   }
   handleCancelEvent(): void {
-    this.dataUpdate = null;
-    this.isVisible = false;
+    this.tags.dataUpdate = null;
+    this.tags.isVisible = false;
   }
   onSeach(): void {
     this.getData();
   }
   changeSortType(value: string): void {
     console.log(value, "value");
-    this.params.sortType = value;
+    this.tags.params.sortType = value;
     this.getData();
   }
   changeSortName(value: string): void {
     console.log("value");
-    this.params.sortName = value;
+    this.tags.params.sortName = value;
     this.getData();
   }
 
@@ -82,11 +90,12 @@ export default class Tags extends Vue {
   getData(): void {
     const payload = {
       userId: this.id,
-      ...this.params,
+      ...this.tags.params,
     };
     const observable = Observable.create((observer: any) => {
       TagService.getList(payload)
         .then((response: any) => {
+          console.log("response.tags", response.tags);
           observer.next(response.tags);
         })
         .catch((error: any) => {
@@ -100,7 +109,7 @@ export default class Tags extends Vue {
     });
     observable.subscribe({
       next: (data: any) => {
-        (this.tags = data), (this.pagination.totalPage = []);
+        (this.tags.tags = data), (this.tags.pagination.totalPage = []);
       },
     });
   }
@@ -126,7 +135,7 @@ export default class Tags extends Vue {
     observable.subscribe({
       next: (data: any) => {
         this.getData();
-        this.isVisible = false;
+        this.tags.isVisible = false;
         swal({
           title: "Success",
           text: `Add tag successfully!`,
@@ -160,8 +169,8 @@ export default class Tags extends Vue {
     observable.subscribe({
       next: (data: any) => {
         this.getData();
-        this.isVisible = false;
-        this.dataUpdate = null;
+        this.tags.isVisible = false;
+        this.tags.dataUpdate = null;
         swal({
           title: "Success",
           text: `Update tag successfully!`,
@@ -172,17 +181,16 @@ export default class Tags extends Vue {
   }
   setPages(): void {
     console.log("this.tags", this.tags);
-    const numPages = this.tags.length / this.pagination.limit;
+    const numPages = this.tags.tags.length / this.tags.pagination.limit;
     console.log("numPages", numPages);
     for (let i = 0; i < numPages; i++) {
       const pageNum = i + 1;
-      this.pagination.totalPage.push(pageNum);
+      this.tags.pagination.totalPage.push(pageNum);
     }
-    console.log("this.pagination", this.pagination);
   }
   paginate(tags: any): void {
-    const page = this.pagination.currentPage;
-    const perPage = this.pagination.limit;
+    const page = this.tags.pagination.currentPage;
+    const perPage = this.tags.pagination.limit;
     const from = page * perPage - perPage;
     const to = page * perPage;
     return tags.slice(from, to);
@@ -194,14 +202,14 @@ export default class Tags extends Vue {
   }
   // computed
   get displayedTags(): void {
-    return this.paginate(this.tags);
+    return this.paginate(this.tags.tags);
   }
 
   created(): void {
     this.getData();
   }
 
-  @Watch("tags")
+  @Watch("tags.tags")
   onChangeTags(): void {
     this.setPages();
   }

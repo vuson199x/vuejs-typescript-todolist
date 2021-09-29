@@ -8,7 +8,7 @@
           id="myInput"
           placeholder="Search for tags..."
           v-on:keyup.enter="onSeach"
-          v-model="params.keyword"
+          v-model="tags.params.keyword"
         />
         <button
           class="button success"
@@ -26,14 +26,14 @@
               v-on:click="changeSortType('asc')"
               v-bind:class="{
                 sortSelected:
-                  params.sortType === 'asc' || params.sortType === '',
+                  tags.params.sortType === 'asc' || tags.params.sortType === '',
               }"
               >Asc</span
             >
             <span
               v-on:click="changeSortType('desc')"
               v-bind:class="{
-                sortSelected: params.sortType === 'desc',
+                sortSelected: tags.params.sortType === 'desc',
               }"
               >Desc</span
             >
@@ -86,27 +86,27 @@
 
       <div class="pagination">
         <a
-          v-if="pagination.currentPage != 1"
-          v-on:click="pagination.currentPage--"
+          v-if="tags.pagination.currentPage != 1"
+          v-on:click="tags.pagination.currentPage--"
           >&laquo;</a
         >
         <a
-          v-for="(pag, index) in pagination.totalPage"
+          v-for="(pag, index) in tags.pagination.totalPage"
           v-bind:key="index"
-          @click="pagination.currentPage = pag"
+          @click="tags.pagination.currentPage = pag"
           >{{ pag }}</a
         >
         <a
-          v-if="pagination.currentPage < pagination.totalPage.length"
-          v-on:click="pagination.currentPage++"
+          v-if="tags.pagination.currentPage < tags.pagination.totalPage.length"
+          v-on:click="tags.pagination.currentPage++"
           >&raquo;</a
         >
       </div>
     </div>
     <AddEditTag
-      v-if="isVisible"
-      v-bind:isVisible="isVisible"
-      v-bind:dataUpdate="dataUpdate"
+      v-if="tags.isVisible"
+      v-bind:isVisible="tags.isVisible"
+      v-bind:dataUpdate="tags.dataUpdate"
       v-on:handleCancelEvent="handleCancelEvent"
       v-on:onCreateTag="onCreateTag"
       v-on:onUpdateTag="onUpdateTag"

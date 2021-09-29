@@ -3,51 +3,60 @@ import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 import CategoryService from "../ApiService/apiCategory";
 import AddEditCategory from "@/components/AddEditCategory.vue";
 import { Observable } from "rxjs";
+import { CategoryModel } from "@/model/CategoryModel";
+import { ParamsInterface } from "@/utils/interface";
 @Component({
   components: {
     AddEditCategory,
   },
 })
 export default class Category extends Vue {
-  id = this.$route.params.id;
-  categories = [];
-  isVisible = false;
-  dataUpdate = null;
-  pagination: any = {
+  isPagination = {
     totalPage: [],
     currentPage: 1,
     limit: 20,
   };
-  params = {
+
+  isParams = {
     page: 1,
     size: 0,
     sortName: "name",
     sortType: "",
     keyword: "",
   };
+  id = this.$route.params.id;
+
+  categories = new CategoryModel(
+    this.id,
+    [],
+    false,
+    null,
+    this.isPagination,
+    this.isParams
+  );
 
   onSeach(): void {
     this.getData();
   }
   changeSortName(value: string): void {
-    this.params.sortName = value;
+    this.categories.params.sortName = value;
     this.getData();
   }
   changeSortType(value: string): void {
     console.log(value, "value");
-    this.params.sortType = value;
+    this.categories.params.sortType = value;
     this.getData();
   }
   isVisibleEditModal(data: any): void {
-    this.dataUpdate = data;
-    this.isVisible = true;
+    this.categories.dataUpdate = data;
+    this.categories.isVisible = true;
   }
   isVisibleAddModal(): void {
-    this.isVisible = true;
+    this.categories.isVisible = true;
   }
   handleCancelEvent(): void {
-    this.dataUpdate = null;
-    this.isVisible = false;
+    this.categories.dataUpdate = null;
+    this.categories.isVisible = false;
   }
   onUpdateCategory(data: { id: string; name: string }): void {
     const payload: any = {
@@ -74,8 +83,8 @@ export default class Category extends Vue {
     observable.subscribe({
       next: (data: any) => {
         this.getData();
-        this.isVisible = false;
-        this.dataUpdate = null;
+        this.categories.isVisible = false;
+        this.categories.dataUpdate = null;
         swal({
           title: "Success",
           text: `Update category successfully!`,
@@ -106,7 +115,7 @@ export default class Category extends Vue {
     observable.subscribe({
       next: (data: any) => {
         this.getData();
-        this.isVisible = false;
+        this.categories.isVisible = false;
         swal({
           title: "Success",
           text: `Add category successfully!`,
@@ -144,9 +153,10 @@ export default class Category extends Vue {
     }
   }
   getData(): void {
+    console.log(this.categories.id, "this.categories.id");
     const payload = {
       userId: this.id,
-      ...this.params,
+      ...this.categories.params,
     };
     const observable = Observable.create((observer: any) => {
       CategoryService.getList(payload)
@@ -164,20 +174,23 @@ export default class Category extends Vue {
     });
     observable.subscribe({
       next: (data: any) => {
-        (this.categories = data), (this.pagination.totalPage = []);
+        (this.categories.categories = data),
+          (this.categories.pagination.totalPage = []);
       },
     });
   }
   setPages(): void {
-    const numPages = this.categories.length / this.pagination.limit;
+    const numPages =
+      this.categories.categories.length / this.categories.pagination.limit;
+    console.log("numPages", numPages);
     for (let i = 0; i < numPages; i++) {
       const pageNum = i + 1;
-      this.pagination.totalPage.push(pageNum);
+      this.categories.pagination.totalPage.push(pageNum);
     }
   }
   paginate(categories: any): void {
-    const page = this.pagination.currentPage;
-    const perPage = this.pagination.limit;
+    const page = this.categories.pagination.currentPage;
+    const perPage = this.categories.pagination.limit;
     const from = page * perPage - perPage;
     const to = page * perPage;
     return categories.slice(from, to);
@@ -187,13 +200,13 @@ export default class Category extends Vue {
     return this.$store.state.AUTH.user;
   }
   get displayedCategories(): void {
-    return this.paginate(this.categories);
+    return this.paginate(this.categories.categories);
   }
   created(): void {
     this.getData();
   }
 
-  @Watch("categories")
+  @Watch("categories.categories")
   onChangeCategory(): void {
     this.setPages();
   }
