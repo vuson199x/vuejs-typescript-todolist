@@ -99,7 +99,9 @@ export default class Tags extends Vue {
         });
     });
     observable.subscribe({
-      next: (data: any) => (this.tags = data),
+      next: (data: any) => {
+        (this.tags = data), (this.pagination.totalPage = []);
+      },
     });
   }
   onCreateTag(name: string): void {
@@ -169,11 +171,14 @@ export default class Tags extends Vue {
     });
   }
   setPages(): void {
+    console.log("this.tags", this.tags);
     const numPages = this.tags.length / this.pagination.limit;
+    console.log("numPages", numPages);
     for (let i = 0; i < numPages; i++) {
       const pageNum = i + 1;
       this.pagination.totalPage.push(pageNum);
     }
+    console.log("this.pagination", this.pagination);
   }
   paginate(tags: any): void {
     const page = this.pagination.currentPage;

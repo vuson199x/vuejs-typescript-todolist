@@ -172,7 +172,9 @@ export default class Product extends Vue {
         });
     });
     observable.subscribe({
-      next: (data: any) => (this.products = data),
+      next: (data: any) => {
+        (this.products = data), (this.pagination.totalPage = []);
+      },
     });
   }
   setPages(): void {

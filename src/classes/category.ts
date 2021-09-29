@@ -163,7 +163,9 @@ export default class Category extends Vue {
         });
     });
     observable.subscribe({
-      next: (data: any) => (this.categories = data),
+      next: (data: any) => {
+        (this.categories = data), (this.pagination.totalPage = []);
+      },
     });
   }
   setPages(): void {
