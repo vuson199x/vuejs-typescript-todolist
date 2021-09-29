@@ -35,15 +35,13 @@ export default class Tags extends Vue {
     this.isParams
   );
   isVisibleEditModal(data: any): void {
-    this.tags.dataUpdate = data;
-    this.tags.isVisible = true;
+    this.tags.isVisibleEditModal(data);
   }
   isVisibleAddModal(): void {
-    this.tags.isVisible = true;
+    this.tags.isVisibleAddModal();
   }
   handleCancelEvent(): void {
-    this.tags.dataUpdate = null;
-    this.tags.isVisible = false;
+    this.tags.handleCancelEvent();
   }
   onSeach(): void {
     this.getData();

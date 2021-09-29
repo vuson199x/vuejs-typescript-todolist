@@ -1,10 +1,10 @@
 import { PaginationInterface, ParamsInterface } from "@/utils/interface";
+import Model from "./Model";
 
-export class TagModel {
+export class TagModel extends Model {
   private _id: string;
   private _tags: any;
-  private _isVisible: boolean;
-  private _dataUpdate: any;
+
   private _pagination: PaginationInterface;
   private _params: ParamsInterface;
 
@@ -16,12 +16,21 @@ export class TagModel {
     pagination: PaginationInterface,
     params: ParamsInterface
   ) {
+    super(dataUpdate, isVisible);
     this._id = id;
     this._tags = tags;
-    this._isVisible = isVisible;
-    this._dataUpdate = dataUpdate;
     this._pagination = pagination;
     this._params = params;
+  }
+
+  public isVisibleEditModal(data: any): void {
+    super.isVisibleEditModal(data);
+  }
+  public isVisibleAddModal(): void {
+    super.isVisibleAddModal();
+  }
+  public handleCancelEvent(): void {
+    super.handleCancelEvent();
   }
 
   public get id(): string {
@@ -38,22 +47,6 @@ export class TagModel {
 
   public set tags(v: any) {
     this._tags = v;
-  }
-
-  public get isVisible(): boolean {
-    return this._isVisible;
-  }
-
-  public set isVisible(v: boolean) {
-    this._isVisible = v;
-  }
-
-  public get dataUpdate(): any {
-    return this._dataUpdate;
-  }
-
-  public set dataUpdate(v: any) {
-    this._dataUpdate = v;
   }
 
   public get pagination(): PaginationInterface {

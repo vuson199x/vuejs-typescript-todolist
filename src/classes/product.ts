@@ -41,15 +41,13 @@ export default class Product extends Vue {
   );
 
   isVisibleEditModal(data: any): void {
-    this.products.dataUpdate = data;
-    this.products.isVisible = true;
+    this.products.isVisibleEditModal(data);
   }
   isVisibleAddModal(): void {
-    this.products.isVisible = true;
+    this.products.isVisibleAddModal();
   }
-  handleCancelEvent() {
-    this.products.dataUpdate = null;
-    this.products.isVisible = false;
+  handleCancelEvent(): void {
+    this.products.handleCancelEvent();
   }
   onSeach(): void {
     this.getData();

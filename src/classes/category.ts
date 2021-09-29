@@ -47,16 +47,15 @@ export default class Category extends Vue {
     this.categories.params.sortType = value;
     this.getData();
   }
+
   isVisibleEditModal(data: any): void {
-    this.categories.dataUpdate = data;
-    this.categories.isVisible = true;
+    this.categories.isVisibleEditModal(data);
   }
   isVisibleAddModal(): void {
-    this.categories.isVisible = true;
+    this.categories.isVisibleAddModal();
   }
   handleCancelEvent(): void {
-    this.categories.dataUpdate = null;
-    this.categories.isVisible = false;
+    this.categories.handleCancelEvent();
   }
   onUpdateCategory(data: { id: string; name: string }): void {
     const payload: any = {
