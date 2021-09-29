@@ -1,7 +1,11 @@
 import { SESSION_ID } from "@/utils/contants";
 
 import swal from "sweetalert";
-import { LoginInterface, RegisterInterface, UserState } from "../interface";
+import {
+  LoginInterface,
+  RegisterInterface,
+  UserState,
+} from "@/model/UserModel";
 import AuthServices from "../../ApiService/auth";
 import router from "../../router";
 import Cookies from "js-cookie";

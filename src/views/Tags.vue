@@ -114,6 +114,6 @@
   </div>
 </template>
 
-<script lang="ts" src="@/classes/tag.ts"></script>
+<script lang="ts" src="@/actions/tag.ts"></script>
 
 <style lang="css" scoped src="../assets/css/global.css"></style>

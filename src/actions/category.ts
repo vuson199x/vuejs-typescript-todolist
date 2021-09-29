@@ -3,8 +3,9 @@ import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 import CategoryService from "../ApiService/apiCategory";
 import AddEditCategory from "@/components/AddEditCategory.vue";
 import { Observable } from "rxjs";
-import { CategoryModel } from "@/model/CategoryModel";
+import { CategoryClass } from "@/classes/CategoryClass";
 import { ParamsInterface } from "@/utils/interface";
+import { CategoryInterface } from "@/model/CategoryModel";
 @Component({
   components: {
     AddEditCategory,
@@ -26,7 +27,7 @@ export default class Category extends Vue {
   };
   id = this.$route.params.id;
 
-  categories = new CategoryModel(
+  categories = new CategoryClass(
     this.id,
     [],
     false,
@@ -39,13 +40,14 @@ export default class Category extends Vue {
     this.getData();
   }
   changeSortName(value: string): void {
-    this.categories.params.sortName = value;
-    this.getData();
+    this.categories.changeSortName(value);
   }
   changeSortType(value: string): void {
-    console.log(value, "value");
-    this.categories.params.sortType = value;
-    this.getData();
+    this.categories.changeSortType(value);
+  }
+
+  getData(): void {
+    this.categories.getData();
   }
 
   isVisibleEditModal(data: any): void {
@@ -57,7 +59,7 @@ export default class Category extends Vue {
   handleCancelEvent(): void {
     this.categories.handleCancelEvent();
   }
-  onUpdateCategory(data: { id: string; name: string }): void {
+  onUpdateCategory(data: CategoryInterface): void {
     const payload: any = {
       id: data.id,
       data: {
@@ -112,7 +114,7 @@ export default class Category extends Vue {
         });
     });
     observable.subscribe({
-      next: (data: any) => {
+      next: () => {
         this.getData();
         this.categories.isVisible = false;
         swal({
@@ -123,7 +125,8 @@ export default class Category extends Vue {
       },
     });
   }
-  onDelete(category: any): void {
+  onDelete(category: CategoryInterface): void {
+    console.log(category, "category");
     if (window.confirm(`Are you want to delete this category?`)) {
       const observable = Observable.create((observer: any) => {
         CategoryService.deleteCategory(category.id)
@@ -140,7 +143,7 @@ export default class Category extends Vue {
           });
       });
       observable.subscribe({
-        next: (data: any) => {
+        next: () => {
           this.getData();
           swal({
             title: "Success",
@@ -151,33 +154,7 @@ export default class Category extends Vue {
       });
     }
   }
-  getData(): void {
-    console.log(this.categories.id, "this.categories.id");
-    const payload = {
-      userId: this.id,
-      ...this.categories.params,
-    };
-    const observable = Observable.create((observer: any) => {
-      CategoryService.getList(payload)
-        .then((response: any) => {
-          observer.next(response.categories);
-        })
-        .catch((error: any) => {
-          swal({
-            title: "Error",
-            text: error.response.data.message,
-            icon: "error",
-          });
-          observer.error(error);
-        });
-    });
-    observable.subscribe({
-      next: (data: any) => {
-        (this.categories.categories = data),
-          (this.categories.pagination.totalPage = []);
-      },
-    });
-  }
+
   setPages(): void {
     const numPages =
       this.categories.categories.length / this.categories.pagination.limit;

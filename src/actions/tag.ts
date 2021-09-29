@@ -1,37 +1,34 @@
-import { ProductModel } from "@/model/ProductModel";
-import {
-  ParamsInterface,
-  ProductInterface,
-  ProductSubmitInterface,
-  User,
-} from "@/utils/interface";
-import { Observable } from "rxjs";
 import swal from "sweetalert";
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
-import ProductService from "../ApiService/apiProduct";
-import AddEditProduct from "../components/AddEditProduct.vue";
+import { ParamsInterface } from "../utils/interface";
+import TagService from "../ApiService/apiTag";
+import AddEditTag from "../components/AddEditTag.vue";
+import { Observable } from "rxjs";
+import { TagClass } from "@/classes/TagClass";
+import { Tag, TagList, UpdateTag } from "@/model/TagModel";
+import { User } from "@/model/UserModel";
 @Component({
   components: {
-    AddEditProduct,
+    AddEditTag,
   },
 })
-export default class Product extends Vue {
-  id = this.$route.params.id;
-
+export default class Tags extends Vue {
   isPagination = {
     totalPage: [],
     currentPage: 1,
     limit: 20,
   };
+
   isParams = {
     page: 1,
     size: 0,
-    sortName: "title",
+    sortName: "name",
     sortType: "",
     keyword: "",
   };
+  id = this.$route.params.id;
 
-  products = new ProductModel(
+  tags = new TagClass(
     this.id,
     [],
     false,
@@ -39,33 +36,32 @@ export default class Product extends Vue {
     this.isPagination,
     this.isParams
   );
-
   isVisibleEditModal(data: any): void {
-    this.products.isVisibleEditModal(data);
+    this.tags.isVisibleEditModal(data);
   }
   isVisibleAddModal(): void {
-    this.products.isVisibleAddModal();
+    this.tags.isVisibleAddModal();
   }
   handleCancelEvent(): void {
-    this.products.handleCancelEvent();
+    this.tags.handleCancelEvent();
   }
   onSeach(): void {
     this.getData();
   }
   changeSortType(value: string): void {
-    console.log(value, "value");
-    this.products.params.sortType = value;
-    this.getData();
+    this.tags.changeSortType(value);
   }
   changeSortName(value: string): void {
-    console.log("value");
-    this.products.params.sortName = value;
-    this.getData();
+    this.tags.changeSortName(value);
   }
-  onDelete(product: ProductInterface): void {
-    if (window.confirm(`Are you want to delete this product?`)) {
+  getData(): void {
+    this.tags.getData();
+  }
+
+  onDelete(tag: Tag): void {
+    if (window.confirm(`Are you want to delete this tag?`)) {
       const observable = Observable.create((observer: any) => {
-        ProductService.deleteProduct(product.id)
+        TagService.deleteTag(tag.id)
           .then((response: any) => {
             observer.next(response);
           })
@@ -79,25 +75,25 @@ export default class Product extends Vue {
           });
       });
       observable.subscribe({
-        next: (data: any) => {
+        next: (data: TagList) => {
           this.getData();
           swal({
             title: "Success",
-            text: `Delete product successfully!`,
+            text: `Delete tag successfully!`,
             icon: "success",
           });
         },
       });
     }
   }
-  onCreateProduct(data: ProductSubmitInterface): void {
-    console.log(data);
+
+  onCreateTag(name: string): void {
     const payload = {
-      ...data,
+      name: name,
       user_id: this.id,
     };
     const observable = Observable.create((observer: any) => {
-      ProductService.postProduct(payload)
+      TagService.postTag(payload)
         .then((response: any) => {
           observer.next(response);
         })
@@ -113,26 +109,25 @@ export default class Product extends Vue {
     observable.subscribe({
       next: (data: any) => {
         this.getData();
-        this.products.isVisible = false;
+        this.tags.isVisible = false;
         swal({
           title: "Success",
-          text: `Add product successfully!`,
+          text: `Add tag successfully!`,
           icon: "success",
         });
       },
     });
   }
-  onUpdateProduct(data: ProductSubmitInterface): void {
-    console.log(data);
+  onUpdateTag(data: UpdateTag): void {
     const payload = {
       id: data.id,
       data: {
-        ...data,
+        name: data.name,
         user_id: this.id,
       },
     };
     const observable = Observable.create((observer: any) => {
-      ProductService.putProduct(payload)
+      TagService.putTag(payload)
         .then((response: any) => {
           observer.next(response);
         })
@@ -146,74 +141,48 @@ export default class Product extends Vue {
         });
     });
     observable.subscribe({
-      next: (data: any) => {
+      next: () => {
         this.getData();
-        this.products.isVisible = false;
-        this.products.dataUpdate = null;
+        this.tags.isVisible = false;
+        this.tags.dataUpdate = null;
         swal({
           title: "Success",
-          text: `Update product successfully!`,
+          text: `Update tag successfully!`,
           icon: "success",
         });
       },
     });
   }
-  getData(): void {
-    const payload = {
-      userId: this.id,
-      ...this.products.params,
-    };
-    const observable = Observable.create((observer: any) => {
-      ProductService.getList(payload)
-        .then((response: any) => {
-          observer.next(response.qas);
-        })
-        .catch((error: any) => {
-          swal({
-            title: "Error",
-            text: error.response.data.message,
-            icon: "error",
-          });
-          observer.error(error);
-        });
-    });
-    observable.subscribe({
-      next: (data: any) => {
-        (this.products.products = data),
-          (this.products.pagination.totalPage = []);
-      },
-    });
-  }
   setPages(): void {
-    const numPages =
-      this.products.products.length / this.products.pagination.limit;
+    const numPages = this.tags.tags.length / this.tags.pagination.limit;
     for (let i = 0; i < numPages; i++) {
       const pageNum = i + 1;
-      this.products.pagination.totalPage.push(pageNum);
+      this.tags.pagination.totalPage.push(pageNum);
     }
   }
-  paginate(products: any): void {
-    const page = this.products.pagination.currentPage;
-    const perPage = this.products.pagination.limit;
+  paginate(tags: any): void {
+    const page = this.tags.pagination.currentPage;
+    const perPage = this.tags.pagination.limit;
     const from = page * perPage - perPage;
     const to = page * perPage;
-    return products.slice(from, to);
+    return tags.slice(from, to);
   }
-  //computed
+
+  // computed
   get result(): User {
     return this.$store.state.AUTH.user;
   }
-  //computed
-  get displayedProducts(): any {
-    return this.paginate(this.products.products);
+  // computed
+  get displayedTags(): void {
+    return this.paginate(this.tags.tags);
   }
 
   created(): void {
     this.getData();
   }
 
-  @Watch("products.products")
-  onChangeProduct(): void {
+  @Watch("tags.tags")
+  onChangeTags(): void {
     this.setPages();
   }
 }

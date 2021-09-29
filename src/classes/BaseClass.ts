@@ -1,4 +1,4 @@
-export default class Model {
+export default abstract class BaseClass {
   private _dataUpdate: any;
   private _isVisible: boolean;
 
@@ -23,15 +23,19 @@ export default class Model {
     this._dataUpdate = v;
   }
 
-  isVisibleEditModal(data: any): void {
+  public isVisibleEditModal(data: any): void {
     this._dataUpdate = data;
     this._isVisible = true;
   }
-  isVisibleAddModal(): void {
+  public isVisibleAddModal(): void {
     this._isVisible = true;
   }
-  handleCancelEvent(): void {
+  public handleCancelEvent(): void {
     this._dataUpdate = null;
     this._isVisible = false;
   }
+
+  abstract changeSortName(value: string): void;
+  abstract changeSortType(value: string): void;
+  abstract getData(): void;
 }

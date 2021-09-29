@@ -117,5 +117,5 @@
   </div>
 </template>
 
-<script lang="ts" src="@/classes/category.ts"></script>
+<script lang="ts" src="@/actions/category.ts"></script>
 <style lang="css" scoped src="../assets/css/global.css"></style>

@@ -125,6 +125,6 @@
   </div>
 </template>
 
-<script lang="ts" src="@/classes/product.ts"></script>
+<script lang="ts" src="@/actions/product.ts"></script>
 
 <style lang="css" scoped src="@/assets/css/global.css"></style>

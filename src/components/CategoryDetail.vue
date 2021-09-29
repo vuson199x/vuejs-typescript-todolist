@@ -11,10 +11,11 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
-import { User } from "../utils/interface";
+
 import CategoryService from "@/ApiService/apiCategory";
 import swal from "sweetalert";
 import { Observable } from "rxjs";
+import { User } from "@/model/UserModel";
 @Component
 export default class CategoryDetail extends Vue {
   categoryId = this.$route.params.categoryId;

@@ -1,7 +1,11 @@
 import { PaginationInterface, ParamsInterface } from "@/utils/interface";
-import Model from "./Model";
+import { Observable } from "rxjs";
+import swal from "sweetalert";
+import BaseClass from "./BaseClass";
+import ProductService from "@/ApiService/apiProduct";
+import { ProductList } from "@/model/ProductModal";
 
-export class ProductModel extends Model {
+export class ProductClass extends BaseClass {
   private _id: string;
   private _products: any;
   private _pagination: PaginationInterface;
@@ -30,6 +34,43 @@ export class ProductModel extends Model {
   }
   public handleCancelEvent(): void {
     super.handleCancelEvent();
+  }
+
+  public changeSortName(value: string): void {
+    this._params.sortName = value;
+    this.getData();
+  }
+
+  public changeSortType(value: string): void {
+    this._params.sortType = value;
+    this.getData();
+  }
+
+  public getData(): void {
+    const payload = {
+      userId: this.id,
+      ...this._params,
+    };
+    const observable = Observable.create((observer: any) => {
+      ProductService.getList(payload)
+        .then((response: any) => {
+          console.log("response", response);
+          observer.next(response.qas);
+        })
+        .catch((error: any) => {
+          swal({
+            title: "Error",
+            text: error.response.data.message,
+            icon: "error",
+          });
+          observer.error(error);
+        });
+    });
+    observable.subscribe({
+      next: (data: ProductList) => {
+        (this._products = data), (this._pagination.totalPage = []);
+      },
+    });
   }
 
   public get id(): string {

@@ -18,7 +18,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
-import { User } from "../utils/interface";
+import { User } from "@/model/UserModel";
 import ProductService from "@/ApiService/apiProduct";
 import swal from "sweetalert";
 import { Observable } from "rxjs";
